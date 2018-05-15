@@ -17,6 +17,24 @@ const Search = (resolve) => {
     })
 };
 
+const Login = (resolve) => {
+    import('@/components/login/login').then((module) => {
+        resolve(module)
+    })
+};
+
+const LoginPhone = (resolve) => {
+    import('@/components/login/loginphone').then((module) => {
+        resolve(module)
+    })
+};
+
+const Register = (resolve) => {
+    import('@/components/login/register').then((module) => {
+        resolve(module)
+    })
+};
+
 
 export default new Router({
     routes: [
@@ -32,6 +50,18 @@ export default new Router({
         {
             path: '/search',
             component: Search
+        },
+        {
+            path: '/login',
+            component: Login
+        },
+        {
+            path: '/loginphone',
+            component: LoginPhone
+        },
+        {
+            path: '/register',
+            component: Register
         }
     ]
 })

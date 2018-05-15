@@ -10,8 +10,8 @@
 <script type="text/ecmascript-6">
     import header       from '@/components/base/header/header'
     import tabbar       from '@/components/base/tabbar/tabbar'
-    import sidebar       from '@/components/base/sidebar/sidebar'
-    import mask       from '@/components/base/mask/mask'
+    import sidebar      from '@/components/base/sidebar/sidebar'
+    import mask         from '@/components/base/mask/mask'
 
     export default {
         components: {

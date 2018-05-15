@@ -3,8 +3,8 @@
         <div class="s-search">
             <div class="s-inputcover">
                 <i class="back el-icon-back" @click="goBack"></i>
-                <input class="s-search-text" placeholder="猜你喜欢我们" id="s-search-text" v-model="message"  @keyup="search">
-                <i class="close el-icon-close" @click="searchClose" v-if="state"></i>
+                <input class="s-search-text" placeholder="猜你喜欢我们" id="s-search-text" ref="searchval" v-model="message" @keyup="search">
+                <i class="close el-icon-close" @click="searchClose" v-show="closeState"></i>
             </div>
         </div>
     </div>
@@ -21,23 +21,31 @@
             return {
                 message: '',
                 // 关闭按钮显示
-                state: false
+                closeState: false,
+
+                searchState: {"showhot": true, "showdetail": false, "searchtext": '', "showsug": false}
             }
         },
         props: {
-
+            
         },
         watch: {},
         methods: {
             // 模糊查询
             search () {
-                let searchText = document.getElementById('s-search-text').value
-                let sug = document.getElementById('s-sug')
-                sug.style.display = searchText =='' ? 'none' : 'block'
+                //console.log(this.$refs.searchval.value,'11111111111')
+                //console.log(this.message,document.getElementById("s-search-text").value, '22222222222222')
+                /**
+                 * 在搜索输入为中文输入法时，通过v-model获取不到值，即this.message为空
+                 * **/
+                let searchText = this.$refs.searchval.value
                 if (searchText =='') {
                     return
                 } else {
-                    this.state = true
+                    this.closeState = true
+                    this.searchState.showsug = true
+                    this.searchState.searchtext = this.$refs.searchval.value
+                    this.$emit('searchstate', this.searchState)
                 }
                 axios.get('http://localhost:3000/search/suggest?keywords=' + searchText, {}, {headers:{'Content-Type':'application/x-www-form-urlencoded'}})
                     .then((res) => {
@@ -52,9 +60,11 @@
             },
             // 搜索关闭
             searchClose () {
-                document.getElementById('s-search-text').value = ''
-                document.getElementById('s-sug').style.display = 'none'
-                this.$emit('showlist', [true, false])
+                this.message = ''
+                this.closeState = false
+                this.searchState.showsug = false
+                this.searchState.searchtext = this.message
+                this.$emit('searchstate', this.searchState)
             },
             // 返回上一页
             goBack () {
@@ -63,13 +73,13 @@
         },
         filters: {},
         computed: {
-
+            
         },
         created () {
 
         },
         mounted () {
-
+            
         },
         destroyed () {}
     }

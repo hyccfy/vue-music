@@ -5,7 +5,7 @@
                 <div class="s-sidebar-header-bg">
                     <p>登录网易云音乐</p>
                     <p>320K高音质无限下载，手机电脑多端同步</p>
-                    <div class="btn">立即登录</div>
+                    <div class="btn" @click="login">立即登录</div>
                     <!--<div class="s-avatar">
                         <img src="../../../assets/img/bg.jpg">
                     </div>
@@ -115,7 +115,11 @@
         },
         watch: {},
         methods: {
-
+            login () {
+                this.$router.push({
+                    path: '../login'
+                })
+            }
         },
         filters: {},
         computed: {},

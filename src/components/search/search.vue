@@ -1,6 +1,6 @@
 <template>
     <div class="search">
-        <s-search @search="search" @showlist="showlist"></s-search>
+        <s-search @search="search" @searchstate="searchstate" ref="close"></s-search>
         <div class="s-default" id="s-default">
             <div class="s-classification" id="s-classification" @click="classification" v-if="showhot">
                 <i class="el-icon-mobile-phone"></i>
@@ -16,7 +16,7 @@
                 </ul>
             </div>
             <!--搜索框模糊查询-->
-            <div class="s-sug" id="s-sug">
+            <div class="s-sug" v-show="sugState">
                 <ul>
                     <li class="title">搜索'{{message}}'</li>
                     <li v-for="item in items" @click="show(item)">
@@ -27,7 +27,15 @@
             </div>
             <!--搜索历史记录-->
             <div class="s-history" v-if="showhot">
-                <ul></ul>
+                <ul class="s-history-list">
+                    <li class="s-history-item" v-for="record in records" @click="searchhistory(record)">
+                        <i class="el-icon-time s-time"></i>
+                        <div class="s-history-bd">
+                            <span>{{record.name}}</span>
+                            <i class="el-icon-close s-close" @click.stop="delrecord(record)"></i>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </div>
         <!--歌曲搜索详情-->
@@ -64,13 +72,15 @@
         data () {
             return {
                 items: [],
+                records: [],
                 hots: [],
                 message: '',
                 listData: [],
                 artistData: {},
                 albumData: {},
                 showhot: true,
-                state: false
+                state: false,
+                sugState: false
             }
         },
         props: {
@@ -85,10 +95,12 @@
             search (...data) {
                 this.items = data[0]
             },
-            showlist (...data) {
-                console.log(data[0], 555)
-                this.showhot = data[0][0]
-                this.state = data[0][1]
+            // 搜索时状态控制
+            searchstate (...data) {
+                this.showhot = data[0]["showhot"]
+                this.state = data[0]["showdetail"]
+                this.message = data[0]["searchtext"]
+                this.sugState = data[0]["showsug"]
             },
             // 热门搜索
             hot () {
@@ -103,10 +115,19 @@
                         console.log(err)
                     })
             },
+            // 歌曲搜索列表
             show (item) {
                 console.log(item,444)
                 let searchText = item.keyword
-                document.getElementById('s-search-text').value = searchText;
+                this.records = this.records
+                                .filter(item => item.name !== searchText)
+                this.records.unshift({"name": searchText})
+                if(this.records.length > 5) {
+                    this.records = this.records.slice(0, 5)
+                }
+                localStorage.setItem('key', JSON.stringify({"any": this.records}))
+                this.$refs.close.message = searchText
+                this.sugState = false
                 this.showhot = false
                 this.state = true
                 axios.get('http://localhost:3000/search/multimatch?keywords=' + searchText, {}, {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
@@ -122,7 +143,49 @@
                     })
                 axios.get('http://localhost:3000/search?keywords=' + searchText, {}, {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
                     .then((res) => {
-                        console.log(res)
+                        console.log(res, 333)
+                        if (res.data.code == 200) {
+                            this.listData = res.data.result.songs
+                        }
+                    })
+                    .catch((err) => {
+                        console.log(err)
+                    })
+            },
+            // 删除搜索记录
+            delrecord (record) {
+                console.log(record, '333333333333333')
+                let name = record["name"]
+                this.records = this.records
+                                .filter(item => item.name !== name)
+                localStorage.setItem('key', JSON.stringify({"any": this.records}))
+            },
+            // 点击搜索记录
+            searchhistory (record) {
+                console.log(record)
+                let searchText = record["name"]
+                this.records = this.records
+                                .filter(item => item.name !== searchText)
+                                .unshift({"name": searchText})
+                this.$refs.close.closeState = true
+                this.$refs.close.message = searchText
+                this.sugState = false
+                this.showhot = false
+                this.state = true
+                axios.get('http://localhost:3000/search/multimatch?keywords=' + searchText, {}, {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+                    .then((res) => {
+                        console.log(res,'1111111111111111111111111111111')
+                        if (res.data.code == 200) {
+                            this.artistData = res.data.result.artist[0]
+                            this.albumData  = res.data.result.album[0]
+                        }
+                    })
+                    .catch((err) => {
+                        console.log(err)
+                    })
+                axios.get('http://localhost:3000/search?keywords=' + searchText, {}, {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+                    .then((res) => {
+                        console.log(res, 333)
                         if (res.data.code == 200) {
                             this.listData = res.data.result.songs
                         }
@@ -141,6 +204,13 @@
         },
         mounted () {
             this.hot()
+            //let data = localStorage.removeItem('key')
+            // 读取本地存储的搜索记录
+            let data = JSON.parse(localStorage.getItem('key'))
+            if(data !== null) {
+                this.records = data["any"]
+            }
+            console.log(this.$refs,'66666666666')
         },
         destroyed () {}
     }
@@ -189,7 +259,6 @@
                 top: 60px;
                 background: #fff;
                 box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
-                display: none;
                 z-index: 100;
                 ul{
                     li{
@@ -211,9 +280,34 @@
                     }
                 }
             }
+            .s-history {
+                .s-history-list {
+                    .s-history-item {
+                        display: flex;
+                        height: 50px;
+                        align-items: center;
+                        position: relative;
+                        .s-time {
+                            padding: 0 10px;
+                        }
+                        .s-history-bd {
+                            flex: 1;
+                            display: flex;
+                            width: 1%;
+                            height: 100%;
+                            align-items: center;
+                            .border-1px(#e4e8eb);
+                            .s-close {
+                                position: absolute;
+                                right: 10px;
+                            }
+                        }
+                    }
+                }
+            }
         }
         .s-searchresult{
-            padding: 50px 0;5
+            padding: 50px 0;
             width: 100%;
             height: 100%;
             display: block;
