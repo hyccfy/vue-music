@@ -35,6 +35,24 @@ const Register = (resolve) => {
     })
 };
 
+const Video = (resolve) => {
+    import('@/components/video/video').then((module) => {
+        resolve(module)
+    })
+};
+
+const Song = (resolve) => {
+    import('@/components/song/song').then((module) => {
+        resolve(module)
+    })
+};
+
+const Release = (resolve) => {
+    import('@/components/release/release').then((module) => {
+        resolve(module)
+    })
+};
+
 
 export default new Router({
     routes: [
@@ -62,6 +80,18 @@ export default new Router({
         {
             path: '/register',
             component: Register
+        },
+        {
+            path: '/video',
+            component: Video
+        },
+        {
+            path: '/song',
+            component: Song
+        },
+        {
+            path: '/release',
+            component: Release
         }
     ]
 })

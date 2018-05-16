@@ -97,10 +97,14 @@
             },
             // 搜索时状态控制
             searchstate (...data) {
+                console.log(data, 'aaaaaaaaaaaaaaaaaaaa')
                 this.showhot = data[0]["showhot"]
                 this.state = data[0]["showdetail"]
                 this.message = data[0]["searchtext"]
                 this.sugState = data[0]["showsug"]
+                // 更新本地缓存历史搜索数据
+                // 在搜索详情点击搜索关闭按钮会导致搜索历史名称为空
+                this.localStorageData()
             },
             // 热门搜索
             hot () {
@@ -154,16 +158,16 @@
             },
             // 删除搜索记录
             delrecord (record) {
-                console.log(record, '333333333333333')
-                let name = record["name"]
+                console.log(record, this.records,'333333333333333')
+                let name = (typeof record === 'object') ? record["name"] : ''
                 this.records = this.records
                                 .filter(item => item.name !== name)
                 localStorage.setItem('key', JSON.stringify({"any": this.records}))
             },
             // 点击搜索记录
             searchhistory (record) {
-                console.log(record)
-                let searchText = record["name"]
+                console.log(record,this.records)
+                let searchText = (typeof record === 'object') ? record["name"] : ''
                 this.records = this.records
                                 .filter(item => item.name !== searchText)
                                 .unshift({"name": searchText})
@@ -193,6 +197,14 @@
                     .catch((err) => {
                         console.log(err)
                     })
+            },
+            localStorageData () {
+                //let data = localStorage.removeItem('key')
+                // 读取本地存储的搜索记录
+                let data = JSON.parse(localStorage.getItem('key'))
+                if(data !== null) {
+                    this.records = data["any"]
+                }
             }
         },
         filters: {},
@@ -204,13 +216,7 @@
         },
         mounted () {
             this.hot()
-            //let data = localStorage.removeItem('key')
-            // 读取本地存储的搜索记录
-            let data = JSON.parse(localStorage.getItem('key'))
-            if(data !== null) {
-                this.records = data["any"]
-            }
-            console.log(this.$refs,'66666666666')
+            this.localStorageData()
         },
         destroyed () {}
     }

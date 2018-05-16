@@ -2,13 +2,13 @@
     <div class="header-warpper">
         <i class="menu el-icon-menu" @click="showMenu"></i>
         <div class="header-nav" @click="hideMenu">
-            <router-link tag="i" to="/iMusic">
+            <router-link tag="i" to="/video">
                 <i class="el-icon-circle-plus"></i>
             </router-link>
-            <router-link tag="i" to="/iMusic">
+            <router-link tag="i" to="../../song">
                 <i class="el-icon-circle-plus"></i>
             </router-link>
-            <router-link tag="i" to="/iMusic">
+            <router-link tag="i" to="../../release">
                 <i class="el-icon-circle-plus"></i>
             </router-link>
         </div>
