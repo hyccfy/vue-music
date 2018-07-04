@@ -49,7 +49,8 @@
                     type: 'wy',
                     text: '网易邮箱',
                     url: '../../assets/img/img.jpg'
-                }]
+                }],
+		lists: []
             }
         },
         props: {
