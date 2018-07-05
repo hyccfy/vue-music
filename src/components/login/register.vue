@@ -33,7 +33,8 @@
                 closephone: false,
                 closepass: false,
                 msgphone: '',
-                msgpass: ''
+                msgpass: '',
+		lists: []
             }
         },
         props: {
